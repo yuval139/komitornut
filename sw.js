@@ -1,5 +1,5 @@
-// גרסה 91
-const CACHE = "komitornut-v91";
+// גרסה 92
+const CACHE = "komitornut-v92";
 const CORE = ["./", "./index.html", "./config.js", "./vendor.js", "./app.js", "./assets.js", "./manifest.json",
   "./icons/icon-180.png", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-512-maskable.png"];
 self.addEventListener("install", (e) => {
@@ -20,9 +20,20 @@ self.addEventListener("fetch", (e) => {
     e.respondWith(caches.open("komitornut-ocr").then((c) => c.match(req).then((hit) => hit || fetch(req).then((res) => { if (res && res.ok) c.put(req, res.clone()); return res; }))));
     return;
   }
+  const fromCache = () => caches.match(req, { ignoreSearch: true }).then((hit) => hit || (req.mode === "navigate" ? caches.match("./index.html") : undefined));
+  // no connection at all: answer from the saved copy right away
+  if (self.navigator && self.navigator.onLine === false) {
+    e.respondWith(fromCache().then((hit) => hit || fetch(req)));
+    return;
+  }
   // same-origin files are always revalidated with the server, so a new version
-  // is picked up right away instead of after the host's 10-minute cache
-  const fresh = sameOrigin ? fetch(req.mode === "navigate" ? url.href : req, { cache: "no-cache" }) : fetch(req);
+  // is picked up right away instead of after the host's 10-minute cache.
+  // A connection that hangs falls back to the saved copy after a few seconds.
+  const net = sameOrigin ? fetch(req.mode === "navigate" ? url.href : req, { cache: "no-cache" }) : fetch(req);
+  net.catch(() => {});
+  const fresh = sameOrigin && !url.pathname.endsWith("version.json")
+    ? Promise.race([net, new Promise((_, rej) => setTimeout(() => rej(new Error("slow")), 7000))])
+    : net;
   e.respondWith(
     fresh
       .then((res) => {
@@ -32,6 +43,6 @@ self.addEventListener("fetch", (e) => {
         }
         return res;
       })
-      .catch(() => caches.match(req, { ignoreSearch: true }).then((hit) => hit || (req.mode === "navigate" ? caches.match("./index.html") : undefined)))
+      .catch(() => fromCache().then((hit) => hit || net))
   );
 });
