@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>תורנויות</title>
+<meta name="theme-color" content="#0e1a2b" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="תורנויות" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+<style>
+  html,body{margin:0;padding:0;background:#0e1a2b}
+  body{padding-top:env(safe-area-inset-top)}
+  #boot{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+        font-family:system-ui,-apple-system,sans-serif;color:#c9a45c;background:#0e1a2b}
+  #boot .ring{width:34px;height:34px;border-radius:50%;border:3px solid rgba(201,164,92,.2);border-top-color:#c9a45c;animation:spin .9s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #boot .err{color:#f2ecdf;max-width:320px;text-align:center;line-height:1.6;font-size:14px;direction:rtl}
+</style>
+</head>
+<body>
+<div id="boot"><div class="ring"></div><div>טוען…</div></div>
+<div id="root"></div>
+<script>
+window.storage = {
+  async get(k){const v=localStorage.getItem("kmt:"+k);if(v===null)throw new Error("not found");return{key:k,value:v};},
+  async set(k,v){localStorage.setItem("kmt:"+k,v);return{key:k,value:v};},
+  async delete(k){localStorage.removeItem("kmt:"+k);return{key:k,deleted:true};},
+  async list(p=""){const ks=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith("kmt:"+p))ks.push(k.slice(4));}return{keys:ks};}
+};
+window.onerror = function(m){ var b=document.getElementById("boot"); if(b) b.innerHTML='<div class="err">שגיאה בטעינה:<br>'+m+'</div>'; };
+// ask the browser to keep this app's data even when storage runs low
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function(){});
+</script>
+<script src="vendor.js"></script>
+<script src="assets.js"></script>
+<script src="app.js"></script>
+<script>
+(function(){
+  var b = document.getElementById("boot");
+  var check = function(){ if (document.getElementById("root").childNodes.length) { if (b) b.remove(); return true; } return false; };
+  var n = 0, t = setInterval(function(){ if (check() || ++n > 40) { clearInterval(t); if (!check() && b) b.innerHTML = '<div class="err">האפליקציה לא נטענה. רענן את הדף.</div>'; } }, 100);
+  if ("serviceWorker" in navigator) window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+})();
+</script>
+</body>
+</html>
