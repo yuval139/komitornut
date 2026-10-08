@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function meRef() { return /databases/$(database)/documents/members/$(request.auth.uid); }
+    function approved() { return signedIn() && exists(meRef()) && get(meRef()).data.status == 'approved'; }
+    function isAdmin() { return approved() && get(meRef()).data.is_admin == true; }
+    function level(section) { return get(meRef()).data.levels.get(section, 'none'); }
+    function canRead(section) { return approved() && level(section) in ['read', 'write']; }
+    function canWrite(section) { return approved() && level(section) == 'write'; }
+
+    // one document per person: who they are, whether they are approved, and what they may do
+    match /members/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow list: if isAdmin();
+      // anyone signed in may ask to join (pending). Only the admin's own e-mail
+      // can create an approved admin, and only for itself.
+      allow create: if signedIn() && request.auth.uid == uid && (
+        (request.resource.data.status == 'pending' && request.resource.data.is_admin == false)
+        || (request.auth.token.email == 'yuvally222@gmail.com'
+            && request.auth.token.email_verified == true
+            && request.resource.data.status == 'approved'
+            && request.resource.data.is_admin == true));
+      // admins change anything; a member may only choose who they are, once
+      allow update: if isAdmin() || (signedIn() && request.auth.uid == uid
+        && resource.data.person_id == null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['person_id']));
+      allow delete: if isAdmin();
+    }
+
+    // the crew's data: one document per stored key, with its section named in the document
+    match /docs/{docId} {
+      allow get, list: if canRead(resource.data.section);
+      allow create: if canWrite(request.resource.data.section)
+        && docId == request.resource.data.section + '__' + request.resource.data.key;
+      allow update: if canWrite(request.resource.data.section)
+        && resource.data.section == request.resource.data.section
+        && docId == request.resource.data.section + '__' + request.resource.data.key;
+      allow delete: if false;
+    }
+  }
+}

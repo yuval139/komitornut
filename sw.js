@@ -1,6 +1,6 @@
-// גרסה 78
-const CACHE = "komitornut-v78";
-const CORE = ["./", "./index.html", "./vendor.js", "./app.js", "./assets.js", "./manifest.json",
+// גרסה 79
+const CACHE = "komitornut-v79";
+const CORE = ["./", "./index.html", "./config.js", "./vendor.js", "./app.js", "./assets.js", "./manifest.json",
   "./icons/icon-180.png", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-512-maskable.png"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));
