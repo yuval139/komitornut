@@ -21,20 +21,20 @@
   #boot{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;
         font-family:Heebo,system-ui,-apple-system,sans-serif;color:#c9a45c;background:radial-gradient(120% 70% at 50% 0%,#17294a 0%,#0e1a2b 55%,#0b1523 100%)}
   #boot .halo{position:absolute;width:520px;height:520px;border-radius:50%;top:50%;left:50%;margin:-300px 0 0 -260px;pointer-events:none;
-        background:radial-gradient(circle,rgba(201,164,92,.20) 0%,rgba(201,164,92,.06) 40%,rgba(201,164,92,0) 70%);opacity:0;animation:kbHalo 1.1s ease-out .1s forwards}
+        background:radial-gradient(circle,rgba(201,164,92,.20) 0%,rgba(201,164,92,.06) 40%,rgba(201,164,92,0) 70%);opacity:0;animation:kbHalo .8s ease-out .05s forwards}
   #boot .logo{position:relative;width:min(78vw,340px);aspect-ratio:2.75/1;border-radius:20px;overflow:hidden;border:1px solid rgba(201,164,92,.75);
         box-shadow:0 0 0 4px rgba(201,164,92,.08),0 18px 40px rgba(0,0,0,.45);background:#0b1e5c;opacity:0;transform:scale(.9);filter:blur(6px);
-        animation:kbLogo .8s cubic-bezier(.2,.8,.2,1) .1s forwards,kbBreathe 3.6s ease-in-out 1.6s infinite}
+        animation:kbLogo .6s cubic-bezier(.2,.8,.2,1) .05s forwards,kbBreathe 3.6s ease-in-out 1.5s infinite}
   #boot .logo img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.12);filter:saturate(1.3) contrast(1.06) brightness(1.04)}
   #boot .shine{position:absolute;top:0;bottom:0;width:40%;background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.45) 50%,rgba(255,255,255,0) 100%);
-        transform:translateX(-140%) skewX(-18deg);animation:kbShine .9s ease-in-out .6s forwards}
-  #boot .rule{height:1px;width:0;margin:26px 0 20px;background:linear-gradient(90deg,transparent,rgba(201,164,92,.95),transparent);animation:kbRule .7s cubic-bezier(.2,.8,.2,1) .7s forwards}
+        transform:translateX(-140%) skewX(-18deg);animation:kbShine .7s ease-in-out .4s forwards}
+  #boot .rule{height:1px;width:0;margin:26px 0 20px;background:linear-gradient(90deg,transparent,rgba(201,164,92,.95),transparent);animation:kbRule .5s cubic-bezier(.2,.8,.2,1) .45s forwards}
   #boot .brand{display:flex;align-items:center;gap:16px;direction:rtl}
   #boot .w{font-family:'Suez One',serif;font-size:25px;letter-spacing:6px;background:linear-gradient(180deg,#f6e2a8 0%,#c9a45c 100%);
-        -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transform:translateY(8px);filter:blur(4px);animation:kbWord .6s cubic-bezier(.2,.8,.2,1) forwards}
-  #boot .b{width:1.5px;height:0;background:linear-gradient(180deg,transparent,rgba(201,164,92,.9),transparent);border-radius:1px;animation:kbBar .4s ease-out forwards}
-  #boot .w1{animation-delay:.9s} #boot .b1{animation-delay:1.08s} #boot .w2{animation-delay:1.15s} #boot .b2{animation-delay:1.33s} #boot .w3{animation-delay:1.4s}
-  #boot.out{animation:kbOut .45s ease-in forwards;pointer-events:none}
+        -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transform:translateY(8px);filter:blur(4px);animation:kbWord .45s cubic-bezier(.2,.8,.2,1) forwards}
+  #boot .b{width:1.5px;height:0;background:linear-gradient(180deg,transparent,rgba(201,164,92,.9),transparent);border-radius:1px;animation:kbBar .3s ease-out forwards}
+  #boot .w1{animation-delay:.6s} #boot .b1{animation-delay:.74s} #boot .w2{animation-delay:.8s} #boot .b2{animation-delay:.94s} #boot .w3{animation-delay:1s}
+  #boot.out{animation:kbOut .3s ease-in forwards;pointer-events:none}
   @keyframes kbHalo{to{opacity:1}}
   @keyframes kbLogo{to{opacity:1;transform:scale(1);filter:blur(0)}}
   @keyframes kbBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
@@ -62,28 +62,28 @@ window.onerror = function(m){ var b=document.getElementById("boot"); if(b){ b.cl
 // ask the browser to keep this app's data even when storage runs low
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function(){});
 </script>
-<script>window.KMT_VERSION = 104;</script>
-<script src="vendor.js?v=104"></script>
-<script src="assets.js?v=104"></script>
-<script src="config.js?v=104"></script>
-<script src="app.js?v=104"></script>
+<script>window.KMT_VERSION = 105;</script>
+<script src="vendor.js?v=105"></script>
+<script src="assets.js?v=105"></script>
+<script src="config.js?v=105"></script>
+<script src="app.js?v=105"></script>
 <script>
 (function(){
   // the opening screen stays for its whole animation, and longer while the app is still starting
   var b = document.getElementById("boot");
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var MIN = reduce ? 700 : 2300, MAX = 9000;
+  var MIN = reduce ? 500 : 1500, MAX = 9000;
   var root = document.getElementById("root");
   var started = function(){ return root.childNodes.length > 0; };
   var booting = function(){ return !!root.querySelector("[data-kmt-boot]"); };
   var done = false;
-  var hide = function(){ if (done || !b) return; done = true; b.classList.add("out"); setTimeout(function(){ b.remove(); }, 460); };
+  var hide = function(){ if (done || !b) return; done = true; b.classList.add("out"); setTimeout(function(){ b.remove(); }, 310); };
   var t = setInterval(function(){
     var el = Date.now() - window.KMT_T0;
     if (!b.isConnected || b.querySelector(".err")) { clearInterval(t); return; }
     if (started() && el >= MIN && (!booting() || el >= MAX)) { clearInterval(t); hide(); return; }
     if (!started() && el > 6000) { clearInterval(t); b.innerHTML = '<div class="err">האפליקציה לא נטענה. רענן את הדף.</div>'; }
-  }, 80);
+  }, 50);
   if ("serviceWorker" in navigator) window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
 })();
 // A newer version on the server: right after opening, load it at once; while
