@@ -40,6 +40,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // names-only list (id + name) for the sign-up screen: any signed-in person reads it, only an admin writes it
+    match /signup/{id} {
+      allow get: if signedIn();
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
     // the crew's data: one document per stored key, with its section named in the document
     match /docs/{docId} {
       allow get, list: if canRead(resource.data.section);
