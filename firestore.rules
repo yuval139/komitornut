@@ -47,6 +47,13 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // one small note that every approved member updates after saving, so others know whether to look
+    match /meta/{id} {
+      allow get: if approved();
+      allow create, update: if approved();
+      allow delete: if false;
+    }
+
     // the crew's data: one document per stored key, with its section named in the document
     match /docs/{docId} {
       allow get, list: if canRead(resource.data.section);
