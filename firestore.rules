@@ -9,6 +9,15 @@ service cloud.firestore {
     function level(section) { return get(meRef()).data.levels.get(section, 'none'); }
     function canRead(section) { return approved() && level(section) in ['read', 'write']; }
     function canWrite(section) { return approved() && level(section) == 'write'; }
+    // each stored key belongs to exactly one section
+    function keyOk(section, key) {
+      return (section == 'staff' && key in ['staff', 'departments-and-closing'])
+        || (section == 'rosters' && key in ['history', 'rule-weights', 'custom-rules', 'sheets-link'])
+        || (section == 'closings' && key in ['bakanz-events', 'bakanz-auth'])
+        || (section == 'published' && key in ['published-week'])
+        || (section == 'duty' && key in ['duty-mech', 'duty-sgl', 'duty-off'])
+        || (section == 'requests' && key is string && key.matches('req:.+'));
+    }
 
     // one document per person: who they are, whether they are approved, and what they may do
     match /members/{uid} {
@@ -17,7 +26,9 @@ service cloud.firestore {
       // anyone signed in may ask to join (pending). Only the admin's own e-mail
       // can create an approved admin, and only for itself.
       allow create: if signedIn() && request.auth.uid == uid && (
-        (request.resource.data.status == 'pending' && request.resource.data.is_admin == false)
+        (request.resource.data.status == 'pending' && request.resource.data.is_admin == false
+            && request.resource.data.person_id == null
+            && request.resource.data.keys().hasOnly(['name', 'email', 'status', 'is_admin', 'person_id', 'levels', 'created_at']))
         || (request.auth.token.email == 'yuvally222@gmail.com'
             && request.auth.token.email_verified == true
             && request.resource.data.status == 'approved'
@@ -33,8 +44,10 @@ service cloud.firestore {
     match /docs/{docId} {
       allow get, list: if canRead(resource.data.section);
       allow create: if canWrite(request.resource.data.section)
+        && keyOk(request.resource.data.section, request.resource.data.key)
         && docId == request.resource.data.section + '__' + request.resource.data.key;
       allow update: if canWrite(request.resource.data.section)
+        && keyOk(request.resource.data.section, request.resource.data.key)
         && resource.data.section == request.resource.data.section
         && docId == request.resource.data.section + '__' + request.resource.data.key;
       allow delete: if false;
