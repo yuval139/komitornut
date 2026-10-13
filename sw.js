@@ -1,5 +1,5 @@
-// גרסה 144
-const CACHE = "komitornut-v144";
+// גרסה 145
+const CACHE = "komitornut-v145";
 const CORE = ["./", "./index.html", "./config.js", "./vendor.js", "./app.js", "./assets.js", "./manifest.json",
   "./icons/icon-180.png", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-512-maskable.png"];
 self.addEventListener("install", (e) => {
