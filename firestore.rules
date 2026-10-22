@@ -66,5 +66,33 @@ service cloud.firestore {
         && docId == request.resource.data.section + '__' + request.resource.data.key;
       allow delete: if false;
     }
+    // רשימת כוננות: the list, its officers, and each person's own confirmation
+    match /standby/{id} {
+      function sbPerson() { return get(meRef()).data.get('person_id', null); }
+      function sbOfficer() {
+        return sbPerson() != null
+          && exists(/databases/$(database)/documents/standby/config)
+          && get(/databases/$(database)/documents/standby/config).data.get('officers', []).hasAny([sbPerson()]);
+      }
+      function sbManager() { return isAdmin() || sbOfficer(); }
+      function sbHowOk(d) { return d.how is string && d.how.size() > 0 && d.how.size() <= 100; }
+      allow get: if approved() && (id in ['config', 'current'] || sbManager()
+        || resource == null || resource.data.get('person', null) == sbPerson());
+      allow list: if approved() && sbManager();
+      allow create, update: if approved() && (
+        (id == 'config' && isAdmin())
+        || (id == 'current' && sbManager())
+        || (id.matches('c_.+') && (sbManager() || (
+              sbPerson() != null && request.resource.data.person == sbPerson()
+              && id == 'c_' + request.resource.data.list + '_' + sbPerson()
+              && request.resource.data.keys().hasOnly(['kind', 'list', 'person', 'how', 'at', 'by'])
+              && sbHowOk(request.resource.data))))
+        || (id.matches('how_.+') && (sbManager() || (
+              sbPerson() != null && request.resource.data.person == sbPerson()
+              && id == 'how_' + sbPerson()
+              && request.resource.data.keys().hasOnly(['kind', 'person', 'how', 'at'])
+              && sbHowOk(request.resource.data)))));
+      allow delete: if false;
+    }
   }
 }

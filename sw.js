@@ -1,5 +1,5 @@
-// גרסה 189
-const CACHE = "komitornut-v189";
+// גרסה 190
+const CACHE = "komitornut-v190";
 const CORE = ["./", "./index.html", "./config.js", "./vendor.js", "./app.js", "./assets.js", "./manifest.json",
   "./icons/icon-180.png", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-512-maskable.png"];
 self.addEventListener("install", (e) => {
