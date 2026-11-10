@@ -1,5 +1,5 @@
-// גרסה 349 (the new app; generated from web/sw.template.js at build time)
-const CACHE = "komitornut-v349";
+// גרסה 350 (the new app; generated from web/sw.template.js at build time)
+const CACHE = "komitornut-v350";
 // the app's scripts and styles have content-hashed names: they are kept as they are fetched
 const CORE = ["./", "./index.html", "./manifest.json",
   "./icons/icon-180.png", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-512-maskable.png"];
